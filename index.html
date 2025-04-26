@@ -1,20 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Meu WebApp</title>
+    <title>WebApp Telegram</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #2AABEE;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Olá, WebApp!</h1>
-    <button onclick="enviarDados()">Enviar dados</button>
+    <div class="container">
+        <h2>Formulário WebApp</h2>
+        <input type="text" id="nome" placeholder="Seu nome">
+        <input type="email" id="email" placeholder="Seu e-mail">
+        <input type="tel" id="telefone" placeholder="Seu telefone">
+        <button onclick="enviarDados()">Enviar para o Bot</button>
+    </div>
 
     <script>
         function enviarDados() {
-            Telegram.WebApp.sendData(JSON.stringify({ 
-                nome: "Vini", 
-                acao: "clicou" 
-            }));
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const telefone = document.getElementById('telefone').value;
+
+            const dados = {
+                nome: nome,
+                email: email,
+                telefone: telefone
+            };
+
+            // Envia para o bot como string
+            Telegram.WebApp.sendData(JSON.stringify(dados));
+
+            // Opcional: fecha o WebApp depois
+            Telegram.WebApp.close();
         }
     </script>
 </body>
