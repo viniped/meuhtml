@@ -40,25 +40,28 @@
         <input type="text" id="nome" placeholder="Seu nome">
         <input type="email" id="email" placeholder="Seu e-mail">
         <input type="tel" id="telefone" placeholder="Seu telefone">
-        <button onclick="enviarDados()">Enviar para o Bot</button>
+        <button type="button" onclick="enviarDados()">Enviar para o Bot</button>
     </div>
 
     <script>
+        Telegram.WebApp.ready();
+
         function enviarDados() {
             const nome = document.getElementById('nome').value;
             const email = document.getElementById('email').value;
             const telefone = document.getElementById('telefone').value;
 
-            const dados = {
+            if (!nome || !email || !telefone) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            Telegram.WebApp.sendData(JSON.stringify({
                 nome: nome,
                 email: email,
                 telefone: telefone
-            };
+            }));
 
-            // Envia para o bot como string
-            Telegram.WebApp.sendData(JSON.stringify(dados));
-
-            // Opcional: fecha o WebApp depois
             Telegram.WebApp.close();
         }
     </script>
