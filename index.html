@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planos VIP</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -17,6 +18,18 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
+
+        /* Quando a tela for menor que 600px (tipo celular) */
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: 1fr; /* Apenas 1 coluna */
+            }
+
+            .plan-card img {
+                height: 150px; /* Imagens menores no celular */
+            }
+        }
+
         .plan-card {
             background: rgb(46, 44, 44);
             border-radius: 10px;
