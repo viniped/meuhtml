@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planos VIP</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
@@ -94,8 +93,7 @@
 </head>
 <body>
     <img src="static/logo.png" alt="Logo" class="logo">
-    
-    <h2 style="text-align:center; color: white;">Escolha seu Plano VIP</h2>
+    <div style="height: 50px;"></div>
 
     <div class="grid-container" id="planos"></div>
 
@@ -104,34 +102,17 @@
         Telegram.WebApp.expand();
 
         const planos = {
-            "Shopify Themes": {
-                "imagem": "static/shopify.jpg",
-                "planos": {
-                    "Vitalicio": "R$15,00"
-                }
-            },
-            "Papelaria Personalizada": {
-                "imagem": "static/papelaria.jpg",
-                "planos": {
-                    "1 mês": "R$20,00",
-                    "3 meses": "R$50,00"
-                }
-            },
             "DeepRat Chat GPT4+": {
                 "imagem": "static/gpt4.jpg",
+                "chat_id": -1001904167152,
                 "planos": {
                     "1 mês": "R$25,00",
                     "3 meses": "R$60,00"
                 }
             },
-            "Pack PLR Premium": {
-                "imagem": "static/plr.jpg",
-                "planos": {
-                    "Vitalicio": "R$15,00"
-                }
-            },
             "Deep Rat Gold": {
                 "imagem": "static/gold.jpg",
+                "chat_id": -1002092894674,
                 "planos": {
                     "1 mês": "R$70,00",
                     "3 meses": "R$180,00"
@@ -139,24 +120,36 @@
             },
             "GPT4 E Mid Journey": {
                 "imagem": "static/midjourney.jpg",
+                "chat_id": -1002100911888,
                 "planos": {
                     "1 mês": "R$35,00",
                     "3 meses": "R$90,00"
                 }
             },
+            "Papelaria Personalizada": {
+                "imagem": "static/papelaria.jpg",
+                "chat_id": -1002256910484,
+                "planos": {
+                    "1 mês": "R$20,00",
+                    "3 meses": "R$50,00"
+                }
+            },
             "Deep Rat Planilhas": {
                 "imagem": "static/planilhas.jpg",
+                "chat_id": -1002383001001,
                 "planos": {
                     "Vitalicio": "R$15,00"
                 }
             },
             "DeepRat Pack Designer": {
                 "imagem": "static/designer.jpg",
+                "chat_id": -1002308311510,
                 "planos": {
                     "Vitalicio": "R$30,00"
                 }
             }
         };
+
 
         const container = document.getElementById('planos');
 
