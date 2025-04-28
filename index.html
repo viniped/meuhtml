@@ -147,6 +147,26 @@
                 "planos": {
                     "Vitalicio": "R$30,00"
                 }
+            },
+            "IPTV 1 TELA": { 
+                "imagem": "static/iptv.jpg",
+                "chat_id": -1002308311510,
+                "planos": {
+                    "1 Tela Mensal": "R$25,00",
+                    "1 Tela Trimestral": "R$80,00",
+                    "1 Tela Semestral": "RS160,00",
+                    "1 Tela Anual": "R$250,00"
+                }
+            },
+            "IPTV 2 TELAS": { 
+                "imagem": "static/iptv.jpg",
+                "chat_id": -1002308311510,
+                "planos": {
+                    "2 Telas Mensal": "R$40,00",
+                    "2 Telas Trimestral": "R$160,00",
+                    "2 Telas Semestral": "RS360,00",
+                    "2 Telas Anual": "R$400,00"
+                }
             }
         };
 
@@ -170,14 +190,18 @@
         }
 
         function enviarPlano(nome, tipo, preco) {
+            const chatId = planos[nome]?.chat_id || null;
+
             Telegram.WebApp.sendData(JSON.stringify({
                 canal: nome,
                 plano: tipo,
-                preco: preco
+                preco: preco,
+                chat_id: chatId
             }));
 
             Telegram.WebApp.close();
         }
+
     </script>
 </body>
 </html>
