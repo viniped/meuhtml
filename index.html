@@ -1,107 +1,251 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0e0d0d;
-            margin: 0;
-            padding: 20px;
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        /* Quando a tela for menor que 600px (tipo celular) */
-        @media (max-width: 600px) {
-            .grid-container {
-                grid-template-columns: 1fr; /* Apenas 1 coluna */
-            }
-
-            .plan-card img {
-                height: 150px; /* Imagens menores no celular */
-            }
-        }
-
-        .plan-card {
-            background: rgb(46, 44, 44);
-            border-radius: 10px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-            text-align: center;
-            padding: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .plan-card:hover {
-            transform: scale(1.03);
-        }
-        .plan-card img {
-            width: 100%; /* largura total do card */
-            height: 220px; /* altura fixa */
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .plan-name {
-            font-weight: bold;
-            margin-top: 10px;
-            font-size: 16px;
-        }
-        .plan-price {
-            color: #555;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-            .logo {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        width: 150px;
-        height: 60px;
-        object-fit: contain;
-        z-index: 1000;
-    }
-
-    .plan-name {
-        font-weight: bold;
-        margin-top: 10px;
-        font-size: 16px;
-        color: white; /* mudou para branco */
-    }
-
-    .plan-price {
-        color: #ccc; /* branco mais suave para preço */
-        font-size: 14px;
-        margin-top: 5px;
-    }
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
     body {
-        font-family: Arial, sans-serif;
-        background-color: #0e0e0e; /* fundo mais escuro para destacar */
-        margin: 0;
-        padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #0e0d0d;
+      margin: 0;
+      padding: 20px;
+    }
+    .logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 150px;
+      height: 60px;
+      object-fit: contain;
+      z-index: 1000;
+    }
+    .carousel {
+      width: 100%;
+      max-width: 100%;
+      height: 160px;
+      overflow: hidden;
+      border-radius: 10px;
+      margin: 30px auto 10px;
+      position: relative;
+      cursor: pointer;
+      animation: colorGlow 6s infinite; /* Troca de cor a cada 2 segundos entre as 3 */
+    }
+    .carousel-text {
+      position: absolute;
+      top: -10px; /* distância do topo */
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 4px black; /* para dar destaque no fundo */
+      z-index: 2;
+    }
+    @keyframes colorGlow {
+      0% {
+        box-shadow: 0 0 20px 10px rgba(56, 3, 155, 0.7);
+      }
+      33% {
+        box-shadow: 0 0 20px 10px rgb(19, 184, 184);
+      }
+      66% {
+        box-shadow: 0 0 20px 10px rgb(92, 33, 231);
+      }
+      100% {
+        box-shadow: 0 0 20px 10px rgba(56, 3, 155, 0.7);
+      }
+    }
+
+    .carousel img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: opacity 0.8s ease-in-out;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    @media (max-width: 600px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+      .plan-card img {
+        height: 150px;
+      }
+    }
+    .plan-card {
+      background: rgb(46, 44, 44);
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .plan-card:hover {
+      transform: scale(1.03);
+    }
+    .plan-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .plan-name {
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 16px;
+      color: white;
+    }
+    .plan-price {
+      color: #ccc;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .modal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      padding: 20px;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: #222;
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 70vh;
+      width: 90vw; /* ocupa até 90% da largura da tela */
+      max-width: 600px;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    .modal-content p {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    .modal button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    @media (max-width: 480px) {
+      .modal-content {
+        padding: 15px;
+        font-size: 13px;
+        scroll-behavior: smooth;
+      }
+
+      .modal-content h3 {
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .modal-content p {
+        font-size: 13px;
+      }
+
+      .modal button {
+        width: 100%;
+        font-size: 14px;
+      }
+    }
+    .section-title {
+      margin-top: 50px;
+      margin-bottom: 10px;
+      text-align: left;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
     }
 
 
-    </style>
+  </style>
 </head>
 <body>
-    <img src="static/logo.png" alt="Logo" class="logo">
-    <div style="height: 50px;"></div>
+  <img src="static/logo.png" alt="Logo" class="logo" />
+  <div class="section-title">Destaques</div>
+  <div class="carousel" onclick="carouselClickAction()">
+    
+    <img id="carousel-image" src="static/banner1.jpg" alt="Banner" />
+  </div>
+  <div id="modal-termos" class="modal">
+    <div class="modal-content" style="text-align: justify;">
+      <h3 style="text-align: center;">Termos de Compra, Garantia e Responsabilidades</h3>
+       <p><b>1. Condições Gerais:</b> Ao efetuar uma compra no Deep Rat, o cliente declara estar ciente e de acordo com os termos estabelecidos.</p>
+      <p><b>2. Integridade:</b>A integridade do produto após a entrega é de responsabilidade do cliente. Não nos responsabilizamos por danos causados por mau uso e alterações realizadas após a compra.  Recomendamos que o cliente verifique as condições do produto imediatamente após o recebimento.</p>
+      <p><b>3. Garantia:</b>Produto recebido com problemas ou não funcional Se o produto apresentar falhas no momento do uso, tais como: Erro ao efetuar login; Produto sem plano ou benefícios ativos; Informações de acesso incorretas. O cliente terá direito à substituição do produto. Caso a troca não seja efetuada dentro do prazo de 7 dias, o Deep Rat se compromete a realizar o reembolso integral, conforme previsto no art. 18 do Código de Defesa do Consumidor (CDC)</p>
+      <p><b>4. Prazos:</b>Prazo para reportar problemas: O cliente deve informar qualquer problema em até 7 dias corridos após o recebimento do produto, conforme o direito de arrependimento para compras online (art. 49, CDC). Exclusões de garantia: Não nos responsabilizamos por problemas decorrentes de mau uso, compartilhamento de credenciais ou qualquer violação dos termos de uso do produto.Trocas e reembolsos: São processados após análise da solicitação, mediante comprovação de que o problema foi causado por falha no produto. </p>
+      <p><b>5. Reembolso:</b>Serão concedidos somente em casos de não recebimento do produto. Todas as entregas são automatizadas, e qualquer falha deve ser reportada para análise. Não serão concedidos reembolsos por insatisfação com o produto. Certifique-se de compreender todas as características do item antes da compra</p>
+      <p><b>6. Comprovação:</b>O cliente deve documentar o processo de acesso inicial ao produto por meio de gravação de vídeo.Essa gravação será usada para validação de suporte e reembolsos, caso necessário.A ausência dessa documentação impossibilitará a análise de reembolsos e suporte em eventuais disputas</p>
+      <p><b>7. Aceitação:</b>Ao concluir a compra, o cliente aceita integralmente os termos estabelecidos acima</p>
+      
+      
+  
+      <button onclick="aceitarTermos()">Aceito os Termos</button>
+    </div>
+  </div>
+  
+  <div class="grid-container" id="planos" style="display: none;"></div>
+</body>
+<script>
+Telegram.WebApp.ready();
+Telegram.WebApp.expand();
 
-    <div class="grid-container" id="planos"></div>
+const banners = [
+  { src: "static/banner1.jpg", action: "https://wa.me/5516981404594?text=Teste%20IPTV" },
+  { src: "static/1.jpg", action: "https://deeprat.shop/category/17403718073848229647539252923804538" },
+  { src: "static/2.jpg", action: "https://deeprat.shop/category/17432648608750274641460443997665" },
+  { src: "static/3.jpg", action: "https://deeprat.shop/category/17408769899132451323839434802" },
+  { src: "static/4.jpg", action: "https://deeprat.shop/category/1744195272443791448030830061944" },
+  { src: "static/5.jpg", action: "https://deeprat.shop/category/174032812387874822893273612" },
+  
+];
 
-    <script>
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
+let currentBanner = 0;
+let imgElement = document.getElementById("carousel-image");
 
-        const planos = {
+function showNextBanner() {
+  currentBanner = (currentBanner + 1) % banners.length;
+  imgElement.style.opacity = 0;
+  setTimeout(() => {
+    imgElement.src = banners[currentBanner].src;
+    imgElement.style.opacity = 1;
+  }, 300);
+}
+
+function carouselClickAction() {
+  const action = banners[currentBanner].action;
+  if (action && action !== "none") window.open(action, "_blank");
+}
+
+setInterval(showNextBanner, 5000);
+
+function aceitarTermos() {
+  document.getElementById("modal-termos").style.display = "none";
+  document.getElementById("planos").style.display = "grid";
+}
+const planos = {
             "DeepRat Chat GPT4+": {
                 "imagem": "static/gpt4.jpg",
                 "chat_id": -1001904167152,
@@ -126,28 +270,6 @@
                     "3 meses": "R$90,00"
                 }
             },
-            "Papelaria Personalizada": {
-                "imagem": "static/papelaria.jpg",
-                "chat_id": -1002256910484,
-                "planos": {
-                    "1 mês": "R$20,00",
-                    "3 meses": "R$50,00"
-                }
-            },
-            "Deep Rat Planilhas": {
-                "imagem": "static/planilhas.jpg",
-                "chat_id": -1002383001001,
-                "planos": {
-                    "Vitalicio": "R$15,00"
-                }
-            },
-            "DeepRat Pack Designer": {
-                "imagem": "static/designer.jpg",
-                "chat_id": -1002308311510,
-                "planos": {
-                    "Vitalicio": "R$30,00"
-                }
-            },
             "IPTV 1 TELA": { 
                 "imagem": "static/iptv.jpg",
                 "chat_id": -1002667283364,
@@ -170,38 +292,28 @@
             }
         };
 
+    const container = document.getElementById("planos");
+    for (const [nome, info] of Object.entries(planos)) {
+      for (const [tipoPlano, preco] of Object.entries(info.planos)) {
+        const card = document.createElement("div");
+        card.className = "plan-card";
+        card.onclick = () => enviarPlano(nome, tipoPlano, preco);
 
-        const container = document.getElementById('planos');
+        card.innerHTML = `
+          <img src="${info.imagem}" alt="${nome}" />
+          <div class="plan-name">${nome}</div>
+          <div class="plan-price">${tipoPlano}: ${preco}</div>
+        `;
+        container.appendChild(card);
+      }
+    }
 
-        for (const [nome, info] of Object.entries(planos)) {
-            for (const [tipoPlano, preco] of Object.entries(info.planos)) {
-                const card = document.createElement('div');
-                card.className = 'plan-card';
-                card.onclick = () => enviarPlano(nome, tipoPlano, preco);
-
-                card.innerHTML = `
-                    <img src="${info.imagem}" alt="${nome}">
-                    <div class="plan-name">${nome}</div>
-                    <div class="plan-price">${tipoPlano}: ${preco}</div>
-                `;
-
-                container.appendChild(card);
-            }
-        }
-
-        function enviarPlano(nome, tipo, preco) {
-            const chatId = planos[nome]?.chat_id || null;
-
-            Telegram.WebApp.sendData(JSON.stringify({
-                canal: nome,
-                plano: tipo,
-                preco: preco,
-                chat_id: chatId
-            }));
-
-            Telegram.WebApp.close();
-        }
-
-    </script>
-</body>
+    function enviarPlano(nome, tipo, preco) {
+      const chatId = planos[nome]?.chat_id || null;
+      Telegram.WebApp.sendData(
+        JSON.stringify({ canal: nome, plano: tipo, preco: preco, chat_id: chatId })
+      );
+      Telegram.WebApp.close();
+    }
+</script>
 </html>
