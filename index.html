@@ -7,7 +7,6 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* Estilos Base (Mobile First) */
     :root {
       --text-color: #ffffff;
       --bg-color: #0e0d0d;
@@ -65,6 +64,7 @@
       position: relative;
       cursor: pointer;
       animation: colorGlow 10s infinite;
+      display: none;
     }
 
     .carousel img {
@@ -124,7 +124,12 @@
       margin-top: 5px;
     }
 
-    /* Modal */
+    .plan-category {
+      color: #aaa;
+      font-size: var(--font-size-small);
+      margin-top: 3px;
+    }
+
     .modal {
       display: flex;
       flex-direction: column;
@@ -181,20 +186,15 @@
 
     .hidden { display: none !important; }
 
-    /* Tablet */
     @media (min-width: 600px) {
       body { padding: 20px; }
-
       .logo { width: 130px; }
       .section-title { margin-top: 80px; font-size: var(--font-size-xl); }
-
       .grid-container { grid-template-columns: 1fr 1fr; }
-
       .modal-content { padding: 25px; }
       .modal button { width: auto; padding: 10px 30px; }
     }
 
-    /* Desktop */
     @media (min-width: 992px) {
       body { padding: 30px 50px; }
       .logo { width: 150px; }
@@ -209,13 +209,12 @@
 <body>
   <img src="static/logo.png" alt="Logo" class="logo" />
 
-  <div class="section-title">Destaques</div>
+  <div class="section-title" id="section-title">Destaques</div>
 
   <div class="carousel" id="carousel">
     <img id="carousel-image" src="static/banner1.jpg" alt="Banner" />
   </div>
 
-  <!-- Modal de Termos (inicialmente visível) -->
   <div id="modal-termos" class="modal">
     <div class="modal-content">
       <h3>Termos de Compra, Garantia e Responsabilidades</h3>
@@ -232,34 +231,145 @@
     </div>
   </div>
 
-  <!-- Container dos Planos (inicialmente oculto) -->
   <div class="grid-container" id="planos" style="display: none;"></div>
 
   <script>
-    // Inicialização Telegram WebApp (com fallback)
-    (function initTelegram() {
-      try {
-        if (window.Telegram && Telegram.WebApp) {
-          Telegram.WebApp.ready();
-          Telegram.WebApp.expand();
-        }
-      } catch (e) {
-        console.warn("Telegram WebApp não disponível neste contexto:", e);
+    // Inicialização Telegram WebApp
+    try {
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
       }
-    })();
+    } catch (e) {
+      console.warn("Telegram WebApp não disponível:", e);
+    }
 
+    // ============== CONFIGURAÇÃO ==============
+    const urlParams = new URLSearchParams(window.location.search);
+    const tipoLoja = urlParams.get('tipo') || 'streaming';
+
+    console.log("🔍 Tipo de loja:", tipoLoja);
+
+    // ============== ÚNICO DICIONÁRIO DE PLANOS ==============
+    const planos = {
+      "Crunchyroll Compartilhada": {
+        tipo: "streaming",
+        preco: "R$ 3,99",
+        categoria: "chunch",
+        imagem: "static/crunchyroll.jpg"
+      },
+      "Spotify 60 Dias": {
+        tipo: "streaming",
+        preco: "R$ 12,99",
+        categoria: "spotify",
+        imagem: "static/spotify.jpg"
+      },
+      "DeepRat Chat GPT4+": {
+        tipo: "vip",
+        imagem: "static/gpt4.jpg",
+        chat_id: -1001904167152,
+        planos_vip: {
+          "1 mês": "R$25,00",
+          "3 meses": "R$60,00"
+        }
+      },
+      "DeepRat Chat GPT4+ INDIVIDUAL": {
+        tipo: "vip",
+        imagem: "static/gpt-individual.jpg",
+        chat_id: -1003524491733,
+        planos_vip: {
+          "1 mês": "R$49,00"
+        }
+      },
+      "Deep Rat Gold": {
+        tipo: "vip",
+        imagem: "static/gold.jpg",
+        chat_id: -1002092894674,
+        planos_vip: {
+          "1 mês": "R$70,00",
+          "3 meses": "R$180,00"
+        }
+      },
+      "DeepRat IA (MidJourney + GPT Plus + SuperGrok)": {
+        tipo: "vip",
+        imagem: "static/midjourney.jpg",
+        chat_id: -1002100911888,
+        planos_vip: {
+          "1 mês": "R$40,00",
+          "3 meses": "R$96,00"
+        }
+      },
+      "Canva Pro Anual": {
+        tipo: "vip",
+        imagem: "static/canva.jpg",
+        chat_id: -1002558569402,
+        planos_vip: {
+          "12 meses": "R$71,00"
+        }
+      }
+    };
+
+    // ============== BANNERS ==============
     const banners = [
-      { src: "static/banner1.jpg", action: "https://wa.me/5516981404594?text=Teste%20IPTV" },
-      { src: "static/1.jpg", action: "https://deeprat.shop/category/17403718073848229647539252923804538" },
-      { src: "static/2.jpg", action: "https://deeprat.shop/category/17432648608750274641460443997665" },
-      { src: "static/3.jpg", action: "https://deeprat.shop/category/17408769899132451323839434802" },
-      { src: "static/4.jpg", action: "https://deeprat.shop/category/1744195272443791448030830061944" },
-      { src: "static/5.jpg", action: "https://deeprat.shop/category/174032812387874822893273612" }
+      { src: "static/2.jpg", action: "https://www.deeprat.com.br/" },
+      { src: "static/3.jpg", action: "https://www.deeprat.com.br/" },
+      { src: "static/4.jpg", action: "https://www.deeprat.com.br/" },
+      { src: "static/5.jpg", action: "https://www.deeprat.com.br/" }
     ];
 
     let currentBanner = 0;
     const imgElement = document.getElementById("carousel-image");
     const carousel = document.getElementById("carousel");
+
+    // ============== FUNÇÕES ==============
+
+    function aceitarTermos() {
+      console.log("✅ Termos aceitos");
+      const modal = document.getElementById("modal-termos");
+      const planosContainer = document.getElementById("planos");
+
+      if (modal) modal.classList.add("hidden");
+      if (planosContainer) planosContainer.style.display = "grid";
+
+      renderizarProdutos();
+    }
+
+    // ============== FUNÇÃO ÚNICA DE ENVIO ==============
+    function enviarPlano(nome, dados, planoTipo = null, preco = null, chatId = null) {
+      try {
+        let dataEnviar = {};
+
+        if (dados.tipo === "streaming") {
+          // STREAMING
+          dataEnviar = {
+            nome: nome,
+            preco: dados.preco,
+            categoria: dados.categoria,
+            tipo: "streaming"
+          };
+        } else if (dados.tipo === "vip") {
+          // VIP
+          dataEnviar = {
+            canal: nome,
+            plano: planoTipo,
+            preco: preco,
+            chat_id: chatId,
+            tipo: "vip"
+          };
+        }
+
+        console.log("📤 Enviando:", dataEnviar);
+
+        if (window.Telegram && Telegram.WebApp) {
+          Telegram.WebApp.sendData(JSON.stringify(dataEnviar));
+          Telegram.WebApp.close();
+        } else {
+          alert(`TESTE:\n${JSON.stringify(dataEnviar, null, 2)}`);
+        }
+      } catch (error) {
+        console.error("❌ Erro ao enviar:", error);
+      }
+    }
 
     function showNextBanner() {
       currentBanner = (currentBanner + 1) % banners.length;
@@ -277,107 +387,62 @@
       if (action && action !== "none") window.open(action, "_blank");
     }
 
-    if (carousel) carousel.addEventListener("click", carouselClickAction);
-    if (imgElement) setInterval(showNextBanner, 5000);
-
-    // Planos (SEM vírgulas sobrando)
-    const planos = {
-      "DeepRat Chat GPT4+": {
-        imagem: "static/gpt4.jpg",
-        chat_id: -1001904167152,
-        planos: {
-          "1 mês": "R$25,00",
-          "3 meses": "R$60,00"
-        }
-      },
-      "DeepRat Chat GPT4+ INDIVIDUAL": {
-        imagem: "static/gpt-individual.jpg",
-        chat_id: -1003524491733,
-        planos: {
-          "1 mês": "R$49,00"
-        }
-      },
-      "Deep Rat Gold": {
-        imagem: "static/gold.jpg",
-        chat_id: -1002092894674,
-        planos: {
-          "1 mês": "R$70,00",
-          "3 meses": "R$180,00"
-        }
-      },
-      "DeepRat IA (MidJourney + GPT Plus + SuperGrok)": {
-        imagem: "static/midjourney.jpg",
-        chat_id: -1002100911888,
-        planos: {
-          "1 mês": "R$40,00",
-          "3 meses": "R$96,00"
-        }
-      },
-      "Canva Pro Anual": {
-        imagem: "static/canva.jpg",
-        chat_id: -1002558569402,
-        planos: {
-          "12 meses": "R$71,00"
-        }
-      }
-    };
-
-    function aceitarTermos() {
-      const modal = document.getElementById("modal-termos");
-      const planosContainer = document.getElementById("planos");
-
-      if (modal) modal.classList.add("hidden");
-      if (planosContainer) planosContainer.style.display = "grid";
-    }
-
-    function enviarPlano(nome, tipo, preco) {
-      const chatId = planos[nome]?.chat_id ?? null;
-
-      try {
-        if (window.Telegram && Telegram.WebApp) {
-          Telegram.WebApp.sendData(JSON.stringify({
-            canal: nome,
-            plano: tipo,
-            preco: preco,
-            chat_id: chatId
-          }));
-          Telegram.WebApp.close();
-        } else {
-          // Fallback pra testar fora do Telegram
-          alert(`TESTE:\n${nome}\n${tipo} - ${preco}\nchat_id: ${chatId}`);
-        }
-      } catch (error) {
-        console.error("Erro ao enviar dados para o Telegram:", error);
-        alert("Erro ao enviar dados. Abra pelo Telegram para concluir.");
-      }
-    }
-
-    // Renderiza cards
-    (function renderCards() {
+    function renderizarProdutos() {
       const container = document.getElementById("planos");
-      if (!container) return;
+      if (!container) {
+        console.error("❌ Container não encontrado!");
+        return;
+      }
 
-      for (const [nome, info] of Object.entries(planos)) {
-        for (const [tipoPlano, preco] of Object.entries(info.planos)) {
+      console.log("🎨 Renderizando TODOS os produtos");
+
+      // Mostrar carousel
+      carousel.style.display = "block";
+      if (carousel) carousel.addEventListener("click", carouselClickAction);
+      if (imgElement) setInterval(showNextBanner, 5000);
+
+      // Renderizar TODOS os planos
+      Object.entries(planos).forEach(([nome, dados]) => {
+        if (dados.tipo === "streaming") {
+          // Renderizar STREAMING
           const card = document.createElement("div");
           card.className = "plan-card";
-          card.addEventListener("click", () => enviarPlano(nome, tipoPlano, preco));
+          card.onclick = () => enviarPlano(nome, dados);
 
           card.innerHTML = `
-            <img src="${info.imagem}" alt="${nome}" />
+            <img src="${dados.imagem}" alt="${nome}" />
             <div class="plan-name">${nome}</div>
-            <div class="plan-price">${tipoPlano}: ${preco}</div>
+            <div class="plan-price">${dados.preco}</div>
+            <div class="plan-category">${dados.categoria}</div>
           `;
-
           container.appendChild(card);
-        }
-      }
-    })();
 
-    // Listener do botão (mais confiável no WebView)
+        } else if (dados.tipo === "vip") {
+          // Renderizar VIP com múltiplos planos
+          Object.entries(dados.planos_vip).forEach(([tipoPlano, preco]) => {
+            const card = document.createElement("div");
+            card.className = "plan-card";
+            card.onclick = () => enviarPlano(nome, dados, tipoPlano, preco, dados.chat_id);
+
+            card.innerHTML = `
+              <img src="${dados.imagem}" alt="${nome}" />
+              <div class="plan-name">${nome}</div>
+              <div class="plan-price">${tipoPlano}: ${preco}</div>
+            `;
+            container.appendChild(card);
+          });
+        }
+      });
+
+    }
+
+    // ============== INICIALIZAÇÃO ==============
     document.addEventListener("DOMContentLoaded", () => {
+      console.log("📄 DOM carregado");
       const btn = document.getElementById("btn-aceitar-termos");
-      if (btn) btn.addEventListener("click", aceitarTermos);
+      if (btn) {
+        btn.addEventListener("click", aceitarTermos);
+      }
     });
   </script>
 </body>

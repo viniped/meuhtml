@@ -1,61 +1,70 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deep Rat Telegram Store</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
+    /* Estilos Base (Mobile First) */
+    :root {
+      --text-color: #ffffff;
+      --bg-color: #0e0d0d;
+      --card-bg: rgb(27, 30, 30);
+      --primary-glow: rgba(57, 3, 155, 0.7);
+      --secondary-glow: rgba(92, 33, 231);
+      --tertiary-glow: rgba(57, 3, 155, 0.7);
+      --button-bg: #4CAF50;
+      --font-size-base: 14px;
+      --font-size-small: 12px;
+      --font-size-medium: 16px;
+      --font-size-large: 20px;
+      --font-size-xl: 24px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+
     body {
       font-family: Arial, sans-serif;
-      background-color: #0e0d0d;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
-      padding: 20px;
+      padding: 15px;
+      font-size: var(--font-size-base);
+      line-height: 1.6;
     }
+
     .logo {
       position: absolute;
       top: 10px;
       left: 10px;
-      width: 150px;
-      height: 60px;
+      width: 100px;
+      max-width: 30%;
+      height: auto;
       object-fit: contain;
       z-index: 1000;
     }
+
+    .section-title {
+      margin-top: 70px;
+      margin-bottom: 15px;
+      text-align: left;
+      font-size: var(--font-size-large);
+      font-weight: bold;
+    }
+
     .carousel {
       width: 100%;
-      max-width: 100%;
-      height: 160px;
+      aspect-ratio: 16 / 6;
+      max-height: 200px;
       overflow: hidden;
       border-radius: 10px;
-      margin: 30px auto 10px;
+      margin: 20px auto 10px;
       position: relative;
       cursor: pointer;
-      animation: colorGlow 6s infinite; /* Troca de cor a cada 2 segundos entre as 3 */
-    }
-    .carousel-text {
-      position: absolute;
-      top: -10px; /* distância do topo */
-      width: 100%;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      color: white;
-      text-shadow: 1px 1px 4px black; /* para dar destaque no fundo */
-      z-index: 2;
-    }
-    @keyframes colorGlow {
-      0% {
-        box-shadow: 0 0 20px 10px rgba(56, 3, 155, 0.7);
-      }
-      33% {
-        box-shadow: 0 0 20px 10px rgb(19, 184, 184);
-      }
-      66% {
-        box-shadow: 0 0 20px 10px rgb(92, 33, 231);
-      }
-      100% {
-        box-shadow: 0 0 20px 10px rgba(56, 3, 155, 0.7);
-      }
+      animation: colorGlow 10s infinite;
     }
 
     .carousel img {
@@ -64,256 +73,312 @@
       object-fit: cover;
       border-radius: 10px;
       transition: opacity 0.8s ease-in-out;
+      display: block;
     }
+
+    @keyframes colorGlow {
+      0%   { box-shadow: 0 0 15px 8px var(--primary-glow); }
+      33%  { box-shadow: 0 0 15px 8px var(--secondary-glow); }
+      66%  { box-shadow: 0 0 15px 8px var(--tertiary-glow); }
+      100% { box-shadow: 0 0 15px 8px var(--primary-glow); }
+    }
+
     .grid-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 15px;
+      margin-top: 20px;
     }
-    @media (max-width: 600px) {
-      .grid-container {
-        grid-template-columns: 1fr;
-      }
-      .plan-card img {
-        height: 150px;
-      }
-    }
+
     .plan-card {
-      background: rgb(46, 44, 44);
+      background: var(--card-bg);
       border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
       overflow: hidden;
       text-align: center;
       padding: 10px;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s ease-in-out;
     }
-    .plan-card:hover {
-      transform: scale(1.03);
-    }
+
+    .plan-card:hover { transform: scale(1.03); }
+
     .plan-card img {
       width: 100%;
-      height: 220px;
+      height: auto;
+      aspect-ratio: 16 / 9;
       object-fit: cover;
       border-radius: 8px;
+      display: block;
     }
+
     .plan-name {
       font-weight: bold;
       margin-top: 10px;
-      font-size: 16px;
-      color: white;
+      font-size: var(--font-size-medium);
     }
+
     .plan-price {
       color: #ccc;
-      font-size: 14px;
+      font-size: var(--font-size-base);
       margin-top: 5px;
     }
+
+    /* Modal */
     .modal {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background-color: rgba(0, 0, 0, 0.9);
-      color: #fff;
-      padding: 20px;
+      color: var(--text-color);
+      padding: 15px;
       z-index: 2000;
+      box-sizing: border-box;
     }
+
     .modal-content {
       background: #222;
       border-radius: 8px;
       padding: 20px;
-      max-height: 70vh;
-      width: 90vw; /* ocupa até 90% da largura da tela */
+      width: 100%;
       max-width: 600px;
+      max-height: 85vh;
       overflow-y: auto;
       box-sizing: border-box;
-    }
-    .modal-content p {
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 12px;
       text-align: justify;
     }
 
+    .modal-content h3 {
+      font-size: var(--font-size-medium);
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .modal-content p {
+      font-size: var(--font-size-base);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
     .modal button {
-      margin-top: 15px;
-      padding: 10px 20px;
+      margin-top: 20px;
+      padding: 12px 20px;
       border: none;
-      background-color: #4CAF50;
+      background-color: var(--button-bg);
       color: white;
       border-radius: 5px;
       cursor: pointer;
-    }
-    @media (max-width: 480px) {
-      .modal-content {
-        padding: 15px;
-        font-size: 13px;
-        scroll-behavior: smooth;
-      }
-
-      .modal-content h3 {
-        font-size: 16px;
-        text-align: center;
-      }
-
-      .modal-content p {
-        font-size: 13px;
-      }
-
-      .modal button {
-        width: 100%;
-        font-size: 14px;
-      }
-    }
-    .section-title {
-      margin-top: 50px;
-      margin-bottom: 10px;
-      text-align: left;
-      font-size: 24px;
+      width: 100%;
+      font-size: var(--font-size-base);
       font-weight: bold;
-      color: white;
+      transition: background-color 0.2s ease;
     }
 
+    .modal button:hover { background-color: #45a049; }
 
+    .hidden { display: none !important; }
+
+    /* Tablet */
+    @media (min-width: 600px) {
+      body { padding: 20px; }
+
+      .logo { width: 130px; }
+      .section-title { margin-top: 80px; font-size: var(--font-size-xl); }
+
+      .grid-container { grid-template-columns: 1fr 1fr; }
+
+      .modal-content { padding: 25px; }
+      .modal button { width: auto; padding: 10px 30px; }
+    }
+
+    /* Desktop */
+    @media (min-width: 992px) {
+      body { padding: 30px 50px; }
+      .logo { width: 150px; }
+      .carousel { margin: 30px auto 20px; max-height: 250px; }
+      .grid-container { gap: 20px; }
+      .plan-card { padding: 15px; }
+      .modal-content { padding: 30px; }
+    }
   </style>
 </head>
+
 <body>
   <img src="static/logo.png" alt="Logo" class="logo" />
+
   <div class="section-title">Destaques</div>
-  <div class="carousel" onclick="carouselClickAction()">
-    
+
+  <div class="carousel" id="carousel">
     <img id="carousel-image" src="static/banner1.jpg" alt="Banner" />
   </div>
+
+  <!-- Modal de Termos (inicialmente visível) -->
   <div id="modal-termos" class="modal">
-    <div class="modal-content" style="text-align: justify;">
-      <h3 style="text-align: center;">Termos de Compra, Garantia e Responsabilidades</h3>
-       <p><b>1. Condições Gerais:</b> Ao efetuar uma compra no Deep Rat, o cliente declara estar ciente e de acordo com os termos estabelecidos.</p>
-      <p><b>2. Integridade:</b>A integridade do produto após a entrega é de responsabilidade do cliente. Não nos responsabilizamos por danos causados por mau uso e alterações realizadas após a compra.  Recomendamos que o cliente verifique as condições do produto imediatamente após o recebimento.</p>
-      <p><b>3. Garantia:</b>Produto recebido com problemas ou não funcional Se o produto apresentar falhas no momento do uso, tais como: Erro ao efetuar login; Produto sem plano ou benefícios ativos; Informações de acesso incorretas. O cliente terá direito à substituição do produto. Caso a troca não seja efetuada dentro do prazo de 7 dias, o Deep Rat se compromete a realizar o reembolso integral, conforme previsto no art. 18 do Código de Defesa do Consumidor (CDC)</p>
-      <p><b>4. Prazos:</b>Prazo para reportar problemas: O cliente deve informar qualquer problema em até 7 dias corridos após o recebimento do produto, conforme o direito de arrependimento para compras online (art. 49, CDC). Exclusões de garantia: Não nos responsabilizamos por problemas decorrentes de mau uso, compartilhamento de credenciais ou qualquer violação dos termos de uso do produto.Trocas e reembolsos: São processados após análise da solicitação, mediante comprovação de que o problema foi causado por falha no produto. </p>
-      <p><b>5. Reembolso:</b>Serão concedidos somente em casos de não recebimento do produto. Todas as entregas são automatizadas, e qualquer falha deve ser reportada para análise. Não serão concedidos reembolsos por insatisfação com o produto. Certifique-se de compreender todas as características do item antes da compra</p>
-      <p><b>6. Comprovação:</b>O cliente deve documentar o processo de acesso inicial ao produto por meio de gravação de vídeo.Essa gravação será usada para validação de suporte e reembolsos, caso necessário.A ausência dessa documentação impossibilitará a análise de reembolsos e suporte em eventuais disputas</p>
-      <p><b>7. Aceitação:</b>Ao concluir a compra, o cliente aceita integralmente os termos estabelecidos acima</p>
-      
-      
-  
-      <button onclick="aceitarTermos()">Aceito os Termos</button>
+    <div class="modal-content">
+      <h3>Termos de Compra, Garantia e Responsabilidades</h3>
+
+      <p><b>1. Condições Gerais:</b> Ao efetuar uma compra no Deep Rat, o cliente declara estar ciente e de acordo com os termos estabelecidos.</p>
+      <p><b>2. Integridade:</b> A integridade do produto após a entrega é de responsabilidade do cliente. Não nos responsabilizamos por danos causados por mau uso e alterações realizadas após a compra.</p>
+      <p><b>3. Garantia:</b> Produto recebido com problemas ou não funcional: o cliente terá direito à substituição do produto. Caso a troca não seja efetuada dentro do prazo de 7 dias, o Deep Rat se compromete a realizar o reembolso integral, conforme art. 18 do CDC.</p>
+      <p><b>4. Prazos:</b> O cliente deve informar qualquer problema em até 7 dias corridos após o recebimento (art. 49, CDC). Não nos responsabilizamos por problemas decorrentes de mau uso/compartilhamento de credenciais.</p>
+      <p><b>5. Reembolso:</b> Somente em casos de não recebimento do produto, mediante análise. Não serão concedidos reembolsos por insatisfação.</p>
+      <p><b>6. Comprovação:</b> O cliente deve documentar o processo de acesso inicial ao produto por meio de gravação de vídeo para validação de suporte/reembolso, se necessário.</p>
+      <p><b>7. Aceitação:</b> Ao concluir a compra, o cliente aceita integralmente os termos estabelecidos acima.</p>
+
+      <button id="btn-aceitar-termos">Aceito os Termos</button>
     </div>
   </div>
-  
+
+  <!-- Container dos Planos (inicialmente oculto) -->
   <div class="grid-container" id="planos" style="display: none;"></div>
-</body>
-<script>
-Telegram.WebApp.ready();
-Telegram.WebApp.expand();
 
-const banners = [
-  { src: "static/banner1.jpg", action: "https://wa.me/5516981404594?text=Teste%20IPTV" },
-  { src: "static/1.jpg", action: "https://deeprat.shop/category/17403718073848229647539252923804538" },
-  { src: "static/2.jpg", action: "https://deeprat.shop/category/17432648608750274641460443997665" },
-  { src: "static/3.jpg", action: "https://deeprat.shop/category/17408769899132451323839434802" },
-  { src: "static/4.jpg", action: "https://deeprat.shop/category/1744195272443791448030830061944" },
-  { src: "static/5.jpg", action: "https://deeprat.shop/category/174032812387874822893273612" },
-  
-];
-
-let currentBanner = 0;
-let imgElement = document.getElementById("carousel-image");
-
-function showNextBanner() {
-  currentBanner = (currentBanner + 1) % banners.length;
-  imgElement.style.opacity = 0;
-  setTimeout(() => {
-    imgElement.src = banners[currentBanner].src;
-    imgElement.style.opacity = 1;
-  }, 300);
-}
-
-function carouselClickAction() {
-  const action = banners[currentBanner].action;
-  if (action && action !== "none") window.open(action, "_blank");
-}
-
-setInterval(showNextBanner, 5000);
-
-function aceitarTermos() {
-  document.getElementById("modal-termos").style.display = "none";
-  document.getElementById("planos").style.display = "grid";
-}
-const planos = {
-            "DeepRat Chat GPT4+": {
-                "imagem": "static/gpt4.jpg",
-                "chat_id": -1001904167152,
-                "planos": {
-                    "1 mês": "R$25,00",
-                    "3 meses": "R$60,00"
-                }
-            },
-            "Deep Rat Gold": {
-                "imagem": "static/gold.jpg",
-                "chat_id": -1002092894674,
-                "planos": {
-                    "1 mês": "R$70,00",
-                    "3 meses": "R$180,00"
-                }
-            },
-            "GPT4 E Mid Journey": {
-                "imagem": "static/midjourney.jpg",
-                "chat_id": -1002100911888,
-                "planos": {
-                    "1 mês": "R$35,00",
-                    "3 meses": "R$90,00"
-                }
-            },
-            "IPTV 1 TELA": { 
-                "imagem": "static/iptv.jpg",
-                "chat_id": -1002667283364,
-                "planos": {
-                    "1 mês": "R$25,00",
-                    "3 meses": "R$80,00",
-                    "6 meses": "RS160,00",
-                    "12 meses": "R$250,00"
-                }
-            },
-            "IPTV 2 TELAS": { 
-                "imagem": "static/iptv.jpg",
-                "chat_id": -1002308311510,
-                "planos": {
-                    "1 mês": "R$40,00",
-                    "3 meses": "R$130,00",
-                    "6 meses": "RS260,00",
-                    "12 meses": "R$400,00"
-                }
-            }
-        };
-
-    const container = document.getElementById("planos");
-    for (const [nome, info] of Object.entries(planos)) {
-      for (const [tipoPlano, preco] of Object.entries(info.planos)) {
-        const card = document.createElement("div");
-        card.className = "plan-card";
-        card.onclick = () => enviarPlano(nome, tipoPlano, preco);
-
-        card.innerHTML = `
-          <img src="${info.imagem}" alt="${nome}" />
-          <div class="plan-name">${nome}</div>
-          <div class="plan-price">${tipoPlano}: ${preco}</div>
-        `;
-        container.appendChild(card);
+  <script>
+    // Inicialização Telegram WebApp (com fallback)
+    (function initTelegram() {
+      try {
+        if (window.Telegram && Telegram.WebApp) {
+          Telegram.WebApp.ready();
+          Telegram.WebApp.expand();
+        }
+      } catch (e) {
+        console.warn("Telegram WebApp não disponível neste contexto:", e);
       }
+    })();
+
+    const banners = [
+      { src: "static/banner1.jpg", action: "https://wa.me/5516981404594?text=Teste%20IPTV" },
+      { src: "static/1.jpg", action: "https://deeprat.shop/category/17403718073848229647539252923804538" },
+      { src: "static/2.jpg", action: "https://deeprat.shop/category/17432648608750274641460443997665" },
+      { src: "static/3.jpg", action: "https://deeprat.shop/category/17408769899132451323839434802" },
+      { src: "static/4.jpg", action: "https://deeprat.shop/category/1744195272443791448030830061944" },
+      { src: "static/5.jpg", action: "https://deeprat.shop/category/174032812387874822893273612" }
+    ];
+
+    let currentBanner = 0;
+    const imgElement = document.getElementById("carousel-image");
+    const carousel = document.getElementById("carousel");
+
+    function showNextBanner() {
+      currentBanner = (currentBanner + 1) % banners.length;
+      if (!imgElement) return;
+
+      imgElement.style.opacity = 0;
+      setTimeout(() => {
+        imgElement.src = banners[currentBanner].src;
+        imgElement.style.opacity = 1;
+      }, 300);
+    }
+
+    function carouselClickAction() {
+      const action = banners[currentBanner]?.action;
+      if (action && action !== "none") window.open(action, "_blank");
+    }
+
+    if (carousel) carousel.addEventListener("click", carouselClickAction);
+    if (imgElement) setInterval(showNextBanner, 5000);
+
+    // Planos (SEM vírgulas sobrando)
+    const planos = {
+      "DeepRat Chat GPT4+": {
+        imagem: "static/gpt4.jpg",
+        chat_id: -1001904167152,
+        planos: {
+          "1 mês": "R$25,00",
+          "3 meses": "R$60,00"
+        }
+      },
+      "DeepRat Chat GPT4+ INDIVIDUAL": {
+        imagem: "static/gpt-individual.jpg",
+        chat_id: -1003524491733,
+        planos: {
+          "1 mês": "R$49,00"
+        }
+      },
+      "Deep Rat Gold": {
+        imagem: "static/gold.jpg",
+        chat_id: -1002092894674,
+        planos: {
+          "1 mês": "R$70,00",
+          "3 meses": "R$180,00"
+        }
+      },
+      "DeepRat IA (MidJourney + GPT Plus + SuperGrok)": {
+        imagem: "static/midjourney.jpg",
+        chat_id: -1002100911888,
+        planos: {
+          "1 mês": "R$40,00",
+          "3 meses": "R$96,00"
+        }
+      },
+      "Canva Pro Anual": {
+        imagem: "static/canva.jpg",
+        chat_id: -1002558569402,
+        planos: {
+          "12 meses": "R$71,00"
+        }
+      }
+    };
+
+    function aceitarTermos() {
+      const modal = document.getElementById("modal-termos");
+      const planosContainer = document.getElementById("planos");
+
+      if (modal) modal.classList.add("hidden");
+      if (planosContainer) planosContainer.style.display = "grid";
     }
 
     function enviarPlano(nome, tipo, preco) {
-      const chatId = planos[nome]?.chat_id || null;
-      Telegram.WebApp.sendData(
-        JSON.stringify({ canal: nome, plano: tipo, preco: preco, chat_id: chatId })
-      );
-      Telegram.WebApp.close();
+      const chatId = planos[nome]?.chat_id ?? null;
+
+      try {
+        if (window.Telegram && Telegram.WebApp) {
+          Telegram.WebApp.sendData(JSON.stringify({
+            canal: nome,
+            plano: tipo,
+            preco: preco,
+            chat_id: chatId
+          }));
+          Telegram.WebApp.close();
+        } else {
+          // Fallback pra testar fora do Telegram
+          alert(`TESTE:\n${nome}\n${tipo} - ${preco}\nchat_id: ${chatId}`);
+        }
+      } catch (error) {
+        console.error("Erro ao enviar dados para o Telegram:", error);
+        alert("Erro ao enviar dados. Abra pelo Telegram para concluir.");
+      }
     }
-</script>
+
+    // Renderiza cards
+    (function renderCards() {
+      const container = document.getElementById("planos");
+      if (!container) return;
+
+      for (const [nome, info] of Object.entries(planos)) {
+        for (const [tipoPlano, preco] of Object.entries(info.planos)) {
+          const card = document.createElement("div");
+          card.className = "plan-card";
+          card.addEventListener("click", () => enviarPlano(nome, tipoPlano, preco));
+
+          card.innerHTML = `
+            <img src="${info.imagem}" alt="${nome}" />
+            <div class="plan-name">${nome}</div>
+            <div class="plan-price">${tipoPlano}: ${preco}</div>
+          `;
+
+          container.appendChild(card);
+        }
+      }
+    })();
+
+    // Listener do botão (mais confiável no WebView)
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("btn-aceitar-termos");
+      if (btn) btn.addEventListener("click", aceitarTermos);
+    });
+  </script>
+</body>
 </html>
