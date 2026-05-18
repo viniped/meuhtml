@@ -343,41 +343,54 @@
     }
 
     // ============== FUNÇÃO ÚNICA DE ENVIO ==============
-    function enviarPlano(nome, dados, planoTipo = null, preco = null, chatId = null) {
-      try {
-        let dataEnviar = {};
+    // Substitua a função enviarPlano no seu index.html por esta:
+  async function enviarPlano(nome, dados, planoTipo = null, preco = null, chatId = null) {
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user;
 
-        if (dados.tipo === "streaming") {
-          // STREAMING
-          dataEnviar = {
-            nome: nome,
-            preco: dados.preco,
-            categoria: dados.categoria,
-            tipo: "streaming"
-          };
-        } else if (dados.tipo === "vip") {
-          // VIP
-          dataEnviar = {
-            canal: nome,
-            plano: planoTipo,
-            preco: preco,
-            chat_id: chatId,
-            tipo: "vip"
-          };
-        }
-
-        console.log("📤 Enviando:", dataEnviar);
-
-        if (window.Telegram && Telegram.WebApp) {
-          Telegram.WebApp.sendData(JSON.stringify(dataEnviar));
-          Telegram.WebApp.close();
-        } else {
-          alert(`TESTE:\n${JSON.stringify(dataEnviar, null, 2)}`);
-        }
-      } catch (error) {
-        console.error("❌ Erro ao enviar:", error);
-      }
+    if (!user) {
+      alert("Por favor, abra pelo Telegram!");
+      return;
     }
+
+    let dataEnviar = {
+      user_id: user.id,
+      tipo: dados.tipo
+    };
+
+    if (dados.tipo === "streaming") {
+      dataEnviar.nome = nome;
+      dataEnviar.preco = dados.preco;
+      dataEnviar.categoria = dados.categoria;
+    } else if (dados.tipo === "vip") {
+      dataEnviar.canal = nome;
+      dataEnviar.plano = planoTipo;
+      dataEnviar.preco = preco;
+      dataEnviar.chat_id = chatId;
+    }
+
+    tg.MainButton.setText("PROCESSANDO PEDIDO...").show();
+    tg.MainButton.showProgress();
+
+    try {
+      // URL da sua nova aplicação na SquareCloud
+      const response = await fetch('https://deeprat-dashboard-dev.squareweb.app/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataEnviar)
+      });
+
+      if (response.ok) {
+        tg.close();
+      } else {
+        alert("Erro ao processar pedido no servidor.");
+      }
+    } catch (error) {
+      alert("Erro de conexão: " + error.message);
+    } finally {
+      tg.MainButton.hide();
+    }
+  }
 
     function showNextBanner() {
       currentBanner = (currentBanner + 1) % banners.length;
