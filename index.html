@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deep Rat Telegram Store</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <style>
     :root {
       --text-color: #ffffff;
       --bg-color: #0e0d0d;
       --card-bg: rgb(27, 30, 30);
       --primary-glow: rgba(57, 3, 155, 0.7);
-      --secondary-glow: rgba(92, 33, 231);
+      --secondary-glow: rgb(92, 33, 231);
       --tertiary-glow: rgba(57, 3, 155, 0.7);
       --button-bg: #4CAF50;
       --font-size-base: 14px;
@@ -25,6 +24,24 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; }
 
+    /* Canvas de faíscas */
+    #sparks {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(1200px 800px at 50% 110%, rgba(92, 33, 231, 0.12), rgba(0,0,0,0)),
+        #0a0a0a;
+    }
+    .vignette {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(circle at 50% 60%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.45) 100%);
+    }
+
     body {
       font-family: Arial, sans-serif;
       background-color: var(--bg-color);
@@ -33,6 +50,8 @@
       padding: 15px;
       font-size: var(--font-size-base);
       line-height: 1.6;
+      position: relative;
+      z-index: 2;
     }
 
     .logo {
@@ -54,54 +73,29 @@
       font-weight: bold;
     }
 
-    .carousel {
-      width: 100%;
-      aspect-ratio: 16 / 6;
-      max-height: 200px;
-      overflow: hidden;
-      border-radius: 10px;
-      margin: 20px auto 10px;
-      position: relative;
-      cursor: pointer;
-      animation: colorGlow 10s infinite;
-      display: none;
-    }
-
-    .carousel img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 10px;
-      transition: opacity 0.8s ease-in-out;
-      display: block;
-    }
-
-    @keyframes colorGlow {
-      0%   { box-shadow: 0 0 15px 8px var(--primary-glow); }
-      33%  { box-shadow: 0 0 15px 8px var(--secondary-glow); }
-      66%  { box-shadow: 0 0 15px 8px var(--tertiary-glow); }
-      100% { box-shadow: 0 0 15px 8px var(--primary-glow); }
-    }
-
     .grid-container {
       display: grid;
       grid-template-columns: 1fr;
       gap: 15px;
       margin-top: 20px;
+      position: relative;
+      z-index: 3;
     }
 
     .plan-card {
       background: var(--card-bg);
       border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
       overflow: hidden;
       text-align: center;
-      padding: 10px;
+      padding: 12px;
       cursor: pointer;
       transition: transform 0.2s ease-in-out;
+      position: relative;
+      z-index: 3;
     }
 
-    .plan-card:hover { transform: scale(1.03); }
+    .plan-card:hover { transform: scale(1.02); }
 
     .plan-card img {
       width: 100%;
@@ -119,7 +113,8 @@
     }
 
     .plan-price {
-      color: #ccc;
+      color: #7ce87f;
+      font-weight: bold;
       font-size: var(--font-size-base);
       margin-top: 5px;
     }
@@ -131,13 +126,13 @@
     }
 
     .modal {
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: fixed;
       inset: 0;
-      background-color: rgba(0, 0, 0, 0.9);
+      background-color: rgba(0, 0, 0, 0.92);
       color: var(--text-color);
       padding: 15px;
       z-index: 2000;
@@ -145,7 +140,7 @@
     }
 
     .modal-content {
-      background: #222;
+      background: #1e1e1e;
       border-radius: 8px;
       padding: 20px;
       width: 100%;
@@ -154,6 +149,7 @@
       overflow-y: auto;
       box-sizing: border-box;
       text-align: justify;
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .modal-content h3 {
@@ -169,7 +165,7 @@
     }
 
     .modal button {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 12px 20px;
       border: none;
       background-color: var(--button-bg);
@@ -179,12 +175,19 @@
       width: 100%;
       font-size: var(--font-size-base);
       font-weight: bold;
-      transition: background-color 0.2s ease;
     }
 
-    .modal button:hover { background-color: #45a049; }
-
-    .hidden { display: none !important; }
+    .info-card {
+      background: rgba(27,30,30,0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 25px;
+      color: var(--text-color);
+      position: relative;
+      z-index: 3;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
 
     @media (min-width: 600px) {
       body { padding: 20px; }
@@ -194,74 +197,66 @@
       .modal-content { padding: 25px; }
       .modal button { width: auto; padding: 10px 30px; }
     }
-
-    @media (min-width: 992px) {
-      body { padding: 30px 50px; }
-      .logo { width: 150px; }
-      .carousel { margin: 30px auto 20px; max-height: 250px; }
-      .grid-container { gap: 20px; }
-      .plan-card { padding: 15px; }
-      .modal-content { padding: 30px; }
-    }
   </style>
 </head>
 
 <body>
+  <canvas id="sparks"></canvas>
+  <div class="vignette"></div>
+
   <img src="static/logo.png" alt="Logo" class="logo" />
-
-  <div class="section-title" id="section-title">Destaques</div>
-
-  <div class="carousel" id="carousel">
-    <img id="carousel-image" src="static/banner2.jpg" alt="Banner" />
-  </div>
+  <div class="section-title">Serviços e Planos VIP</div>
 
   <div id="modal-termos" class="modal">
     <div class="modal-content">
       <h3>Termos de Compra, Garantia e Responsabilidades</h3>
-
-      <p><b>1. Condições Gerais:</b> Ao efetuar uma compra no Deep Rat, o cliente declara estar ciente e de acordo com os termos estabelecidos.</p>
-      <p><b>2. Integridade:</b> A integridade do produto após a entrega é de responsabilidade do cliente. Não nos responsabilizamos por danos causados por mau uso e alterações realizadas após a compra.</p>
-      <p><b>3. Garantia:</b> Produto recebido com problemas ou não funcional: o cliente terá direito à substituição do produto. Caso a troca não seja efetuada dentro do prazo de 7 dias, o Deep Rat se compromete a realizar o reembolso integral, conforme art. 18 do CDC.</p>
-      <p><b>4. Prazos:</b> O cliente deve informar qualquer problema em até 7 dias corridos após o recebimento (art. 49, CDC). Não nos responsabilizamos por problemas decorrentes de mau uso/compartilhamento de credenciais.</p>
-      <p><b>5. Reembolso:</b> Somente em casos de não recebimento do produto, mediante análise. Não serão concedidos reembolsos por insatisfação.</p>
-      <p><b>6. Comprovação:</b> O cliente deve documentar o processo de acesso inicial ao produto por meio de gravação de vídeo para validação de suporte/reembolso, se necessário.</p>
-      <p><b>7. Aceitação:</b> Ao concluir a compra, o cliente aceita integralmente os termos estabelecidos acima.</p>
-
-      <button id="btn-aceitar-termos">Aceito os Termos</button>
+      <p><b>1. Condições Gerais:</b> Ao efetuar uma compra, o cliente declara estar ciente e de acordo com os termos.</p>
+      <p><b>2. Integridade:</b> Não nos responsabilizamos por alterações ou danos causados após a entrega.</p>
+      <p><b>3. Garantia:</b> Produtos com problemas de acesso possuem garantia com substituição imediata ou estorno.</p>
+      <p><b>4. Comprovação:</b> Mantenha prints ou vídeos do processo inicial para agilizar o suporte técnico.</p>
+      <button onclick="aceitarTermos()">Aceito os Termos</button>
     </div>
   </div>
 
-  <div class="grid-container" id="planos" style="display: none;"></div>
+  <div class="grid-container" id="planos"></div>
+
+  <div class="info-card">
+    <h3>Instruções de Entrega</h3>
+    <p>Escolha o produto desejado para gerar o código PIX instantâneo. O acesso é liberado automaticamente após a confirmação.</p>
+  </div>
 
   <script>
-    // Inicialização Telegram WebApp
+    const tg = window.Telegram.WebApp;
     try {
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-      }
+      tg.ready();
+      tg.expand();
     } catch (e) {
-      console.warn("Telegram WebApp não disponível:", e);
+      console.warn("Telegram WebApp offline:", e);
     }
 
-    // ============== CONFIGURAÇÃO ==============
-    const urlParams = new URLSearchParams(window.location.search);
-    const tipoLoja = urlParams.get('tipo') || 'streaming';
+    function aceitarTermos() {
+      localStorage.setItem('aceitou_termos', '1');
+      const modal = document.getElementById('modal-termos');
+      if (modal) modal.style.display = 'none';
+    }
 
-    console.log("🔍 Tipo de loja:", tipoLoja);
+    (function initModal() {
+      const aceitou = localStorage.getItem('aceitou_termos') === '1';
+      const modal = document.getElementById('modal-termos');
+      if (modal) modal.style.display = aceitou ? 'none' : 'flex';
+    })();
 
-    // ============== ÚNICO DICIONÁRIO DE PLANOS ==============
     const planos = {
       "Crunchyroll Compartilhada": {
         tipo: "streaming",
         preco: "R$ 4,99",
-        categoria: "crunch",
+        categoria: "Streaming",
         imagem: "static/crunchyroll.jpg"
       },
       "Spotify 60 Dias": {
         tipo: "streaming",
         preco: "R$ 12,99",
-        categoria: "spotify",
+        categoria: "Streaming",
         imagem: "static/spotify.jpg"
       },
       "DeepRat Chat GPT4+": {
@@ -290,7 +285,7 @@
           "3 meses": "R$249,00"
         }
       },
-      "DeepRat IA (MidJourney + GPT Plus + SuperGrok)": {
+      "DeepRat IA (MidJourney + GPT Plus)": {
         tipo: "vip",
         imagem: "static/midjourney.jpg",
         chat_id: -1002100911888,
@@ -307,7 +302,7 @@
           "12 meses": "R$71,00"
         }
       },
-      "Filmes & Séries (Vitálicio)": {
+      "Filmes & Séries (Vitalício)": {
         tipo: "vip",
         imagem: "static/filmes.jpg",
         chat_id: -1002558569402,
@@ -324,169 +319,40 @@
           "Vitalicio": "R$150,00"
         }
       },
-      "IPTV - 1 Tela Mensal": {
+      "IPTV - 1 Tela": {
         tipo: "vip",
         imagem: "static/iptv.jpg",
         chat_id: -1002667283364,
         planos_vip: {
-          "1 mês": "R$30,00"
-        }
-      },
-      "IPTV - 1 Tela Trimestral": {
-        tipo: "vip",
-        imagem: "static/iptv.jpg",
-        chat_id: -1002667283364,
-        planos_vip: {
-          "3 meses": "R$80,00"
-        }
-      },
-      "IPTV - 1 Tela Anual": {
-        tipo: "vip",
-        imagem: "static/iptv.jpg",
-        chat_id: -1002667283364,
-        planos_vip: {
+          "1 mês": "R$30,00",
+          "3 meses": "R$80,00",
           "12 meses": "R$250,00"
         }
       },
-      "IPTV - 2 Telas Mensal": {
+      "IPTV - 2 Telas": {
         tipo: "vip",
         imagem: "static/iptv.jpg",
         chat_id: -1002667283364,
         planos_vip: {
-          "1 mês": "R$45,00"
-        }
-      },
-      "IPTV - 2 Telas Trimestral": {
-        tipo: "vip",
-        imagem: "static/iptv.jpg",
-        chat_id: -1002667283364,
-        planos_vip: {
-          "1 mês": "R$140,00"
-        }
-      },
-      "IPTV - 2 Telas Anual": {
-        tipo: "vip",
-        imagem: "static/iptv.jpg",
-        chat_id: -1002667283364,
-        planos_vip: {
+          "1 mês": "R$45,00",
+          "3 meses": "R$140,00",
           "12 meses": "R$400,00"
         }
       }
     };
 
-    // ============== BANNERS ==============
-    const banners = [
-      { src: "static/2.jpg", action: "https://www.deeprat.com.br/" },
-      { src: "static/3.jpg", action: "https://www.deeprat.com.br/" },
-      { src: "static/4.jpg", action: "https://www.deeprat.com.br/" },
-      { src: "static/5.jpg", action: "https://www.deeprat.com.br/" }
-    ];
-
-    let currentBanner = 0;
-    const imgElement = document.getElementById("carousel-image");
-    const carousel = document.getElementById("carousel");
-
-    // ============== FUNÇÕES ==============
-
-    function aceitarTermos() {
-      console.log("✅ Termos aceitos");
-      const modal = document.getElementById("modal-termos");
-      const planosContainer = document.getElementById("planos");
-
-      if (modal) modal.classList.add("hidden");
-      if (planosContainer) planosContainer.style.display = "grid";
-
-      renderizarProdutos();
-    }
-
-    // ============== FUNÇÃO ÚNICA DE ENVIO ==============
-    // Substitua a função enviarPlano no seu index.html por esta:
-  async function enviarPlano(nome, dados, planoTipo = null, preco = null, chatId = null) {
-    const tg = window.Telegram.WebApp;
-    const user = tg.initDataUnsafe?.user;
-
-    if (!user) {
-      alert("Por favor, abra pelo Telegram!");
-      return;
-    }
-
-    let dataEnviar = {
-      user_id: user.id,
-      tipo: dados.tipo
-    };
-
-    if (dados.tipo === "streaming") {
-      dataEnviar.nome = nome;
-      dataEnviar.preco = dados.preco;
-      dataEnviar.categoria = dados.categoria;
-    } else if (dados.tipo === "vip") {
-      dataEnviar.canal = nome;
-      dataEnviar.plano = planoTipo;
-      dataEnviar.preco = preco;
-      dataEnviar.chat_id = chatId;
-    }
-
-    tg.MainButton.setText("PROCESSANDO PEDIDO...").show();
-    tg.MainButton.showProgress();
-
-    try {
-      // URL da sua nova aplicação na SquareCloud
-      const response = await fetch('https://deeprat-dashboard-dev.squareweb.app/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataEnviar)
-      });
-
-      if (response.ok) {
-        tg.close();
-      } else {
-        alert("Erro ao processar pedido no servidor.");
-      }
-    } catch (error) {
-      alert("Erro de conexão: " + error.message);
-    } finally {
-      tg.MainButton.hide();
-    }
-  }
-
-    function showNextBanner() {
-      currentBanner = (currentBanner + 1) % banners.length;
-      if (!imgElement) return;
-
-      imgElement.style.opacity = 0;
-      setTimeout(() => {
-        imgElement.src = banners[currentBanner].src;
-        imgElement.style.opacity = 1;
-      }, 300);
-    }
-
-    function carouselClickAction() {
-      const action = banners[currentBanner]?.action;
-      if (action && action !== "none") window.open(action, "_blank");
-    }
-
-    function renderizarProdutos() {
-      const container = document.getElementById("planos");
-      if (!container) {
-        console.error("❌ Container não encontrado!");
-        return;
-      }
-
-      console.log("🎨 Renderizando TODOS os produtos");
-
-      // Mostrar carousel
-      carousel.style.display = "block";
-      if (carousel) carousel.addEventListener("click", carouselClickAction);
-      if (imgElement) setInterval(showNextBanner, 5000);
-
-      // Renderizar TODOS os planos
+    const container = document.getElementById('planos');
+    if (container) {
       Object.entries(planos).forEach(([nome, dados]) => {
         if (dados.tipo === "streaming") {
-          // Renderizar STREAMING
-          const card = document.createElement("div");
-          card.className = "plan-card";
-          card.onclick = () => enviarPlano(nome, dados);
-
+          const card = document.createElement('div');
+          card.className = 'plan-card';
+          card.onclick = () => enviarPedido({
+            nome: nome,
+            tipo: "streaming",
+            preco: dados.preco,
+            categoria: dados.categoria
+          });
           card.innerHTML = `
             <img src="${dados.imagem}" alt="${nome}" />
             <div class="plan-name">${nome}</div>
@@ -494,34 +360,131 @@
             <div class="plan-category">${dados.categoria}</div>
           `;
           container.appendChild(card);
-
         } else if (dados.tipo === "vip") {
-          // Renderizar VIP com múltiplos planos
-          Object.entries(dados.planos_vip).forEach(([tipoPlano, preco]) => {
-            const card = document.createElement("div");
-            card.className = "plan-card";
-            card.onclick = () => enviarPlano(nome, dados, tipoPlano, preco, dados.chat_id);
-
+          Object.entries(dados.planos_vip).forEach(([periodo, preco]) => {
+            const card = document.createElement('div');
+            card.className = 'plan-card';
+            card.onclick = () => enviarPedido({
+              canal: nome,
+              tipo: "vip",
+              plano: periodo,
+              preco: preco,
+              chat_id: dados.chat_id
+            });
             card.innerHTML = `
               <img src="${dados.imagem}" alt="${nome}" />
               <div class="plan-name">${nome}</div>
-              <div class="plan-price">${tipoPlano}: ${preco}</div>
+              <div class="plan-price">${periodo}: ${preco}</div>
             `;
             container.appendChild(card);
           });
         }
       });
-
     }
 
-    // ============== INICIALIZAÇÃO ==============
-    document.addEventListener("DOMContentLoaded", () => {
-      console.log("📄 DOM carregado");
-      const btn = document.getElementById("btn-aceitar-termos");
-      if (btn) {
-        btn.addEventListener("click", aceitarTermos);
+    async function enviarPedido(dadosProduto) {
+      const user = tg.initDataUnsafe?.user;
+
+      if (!user) {
+        alert("Abra este painel diretamente pelo Telegram!");
+        return;
       }
-    });
+
+      const payload = {
+        user_id: user.id,
+        ...dadosProduto
+      };
+
+      tg.MainButton.setText("GERANDO PAGAMENTO...").show();
+      tg.MainButton.showProgress();
+
+      try {
+        const response = await fetch('https://deeprat-dashboard-dev.squareweb.app/webhook', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          tg.close();
+        } else {
+          alert("Erro ao registrar pedido. Tente novamente em instantes.");
+        }
+      } catch (error) {
+        alert("Erro de conexão ao comunicar com o servidor.");
+        console.error(error);
+      } finally {
+        tg.MainButton.hide();
+      }
+    }
+
+    // Canvas Background Animation
+    (function(){
+      const DPR = Math.min(window.devicePixelRatio || 1, 2);
+      const c = document.getElementById('sparks');
+      const ctx = c.getContext('2d');
+      function resize(){
+        const w = window.innerWidth, h = window.innerHeight;
+        c.style.width = w + 'px'; c.style.height = h + 'px';
+        c.width = Math.floor(w * DPR); c.height = Math.floor(h * DPR);
+        ctx.setTransform(DPR,0,0,DPR,0,0);
+      }
+      resize(); 
+      window.addEventListener('resize', resize, {passive:true});
+
+      const palette = [[160,80,255],[120,40,230],[90,20,200],[60,10,160]];
+      function makeSprite(r=18){
+        const off = document.createElement('canvas');
+        off.width = off.height = r*4;
+        const o = off.getContext('2d');
+        const cx = off.width/2, cy = off.height/2;
+        const g = o.createRadialGradient(cx,cy,r*.15,cx,cy,r*1.7);
+        const [c0,c1,c2,c3]=palette;
+        g.addColorStop(0,`rgba(${c0[0]},${c0[1]},${c0[2]},1)`);
+        g.addColorStop(.35,`rgba(${c1[0]},${c1[1]},${c1[2]},.85)`);
+        g.addColorStop(.7,`rgba(${c2[0]},${c2[1]},${c2[2]},.45)`);
+        g.addColorStop(1,`rgba(${c3[0]},${c3[1]},${c3[2]},0)`);
+        o.fillStyle=g; o.beginPath(); o.arc(cx,cy,r*1.8,0,Math.PI*2); o.fill();
+        return off;
+      }
+      let sprite = makeSprite(18);
+      const particles=[]; const params={density: 350, size: 1.0};
+      const rand=(a,b)=>Math.random()*(b-a)+a;
+
+      function spawn(w,h){
+        return {x:rand(-w*.05,w*1.05), y:h+rand(0,h*.12), vx:rand(-1.5,1.5), vy:rand(-4,-1.5), age:0, life:rand(1.2,2.6), s:rand(.7,1.4)*params.size};
+      }
+
+      let last=performance.now();
+      function tick(){
+        const now=performance.now(); const dt=Math.min(.033,(now-last)/1000); last=now;
+        const w=window.innerWidth, h=window.innerHeight;
+
+        if(particles.length<params.density){
+          for(let i=0;i<8;i++) particles.push(spawn(w,h));
+        }
+
+        for(let i=particles.length-1; i>=0; i--){
+          const p = particles[i];
+          p.x+=p.vx; p.y+=p.vy; p.age+=dt;
+          if(p.age>p.life || p.y < -50) particles.splice(i,1);
+        }
+
+        ctx.clearRect(0,0,w,h);
+        ctx.globalCompositeOperation='lighter';
+        for(const p of particles){
+          const k=Math.max(0,1-p.age/p.life);
+          const s=18*p.s;
+          ctx.globalAlpha=k;
+          ctx.drawImage(sprite,p.x-s,p.y-s,s*2,s*2);
+        }
+        requestAnimationFrame(tick);
+      }
+      tick();
+    })();
   </script>
 </body>
 </html>
